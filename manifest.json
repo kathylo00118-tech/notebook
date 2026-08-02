@@ -1,8 +1,8 @@
 {
   "name": "我的笔记本",
   "short_name": "笔记本",
-  "description": "每日笔记本 - 记录你每天的想法和感受",
-  "start_url": "/",
+  "description": "每日笔记本- 记录你每天的想法和感受",
+  "start_url": "/notebook/index.html",
   "display": "standalone",
   "background_color": "#FFFBF0",
   "theme_color": "#FBBF24",
@@ -23,7 +23,7 @@
   ],
   "screenshots": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23FFFBF0' width='540' height='720'/><rect fill='%23FBBF24' width='540' height='100'/><text x='270' y='60' font-size='40' fill='%23FFF' text-anchor='middle' font-weight='bold'>✨ 笔记本</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23FFFBF0' width='540' height='720'/><rect fill='%23FBBF24' width='540' height='100'/><text x='270' y='60' font-size='40' fill='%23FFF' text-anchor='middle' font-weight='bold'>✨笔记本</text></svg>",
       "sizes": "540x720",
       "type": "image/svg+xml"
     }
