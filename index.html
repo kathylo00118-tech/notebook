@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#FBBF24">
+    <link rel="manifest" href="/notebook/manifest.json">
+    <title>✨ 我的笔记本</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #FFFBF0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            background: linear-gradient(to right, #FBBF24, #FB923C);
+            padding: 20px;
+            text-align: center;
+            color: #78350F;
+        }
+        .header h1 { font-size: 24px; margin-bottom: 5px; }
+        .header p { font-size: 12px; }
+        .container { flex: 1; overflow-y: auto; padding: 15px; }
+        .date-section {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #FCD34D;
+            margin-bottom: 15px;
+        }
+        .date-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .date-btn {
+            flex: 1;
+            padding: 10px;
+            background: #FCD34D;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .date-input {
+            flex: 1.5;
+            padding: 10px;
+            border: 2px solid #FCD34D;
+            border-radius: 8px;
+        }
+        .date-display {
+            text-align: center;
+            font-size: 13px;
+            color: #92400E;
+        }
+        .toolbar {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #FCD34D;
+            margin-bottom: 15px;
+        }
+        .toolbar-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .toolbar-row:last-child { margin-bottom: 0; }
+        .toolbar-btn {
+            flex: 1;
+            padding: 10px;
+            background: #FCD34D;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .color-btn {
+            flex: 1;
+            height: 48px;
+            border-radius: 8px;
+            border: 2px solid #999;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .notebook-area {
+            background: #FEF3C7;
+            border: 3px solid #FCD34D;
+            border-radius: 12px;
+            padding: 0;
+            margin-bottom: 15px;
+            flex: 1;
+            overflow: hidden;
+        }
+        .notebook-area div {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            outline: none;
+            color: #92400E;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            padding: 15px;
+            line-height: 1.8em;
+        }
+        .footer {
+            background: linear-gradient(to right, #FBBF24, #FB923C);
+            color: #78350F;
+            text-align: center;
+            padding: 12px;
+            font-size: 12px;
+        }
+        .menu-container {
+            position: fixed;
+            top: 70px;
+            right: 15px;
+            z-index: 1000;
+        }
+        .menu-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #FBBF24, #FB923C);
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+        }
+        .menu-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+        .menu-dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            overflow: hidden;
+            display: none;
+            border: 2px solid #FCD34D;
+        }
+        .menu-dropdown.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #F3E8D8;
+            color: #92400E;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item:hover {
+            background: #FEF3C7;
+        }
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 15px;
+            background: #10B981;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            z-index: 999;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 300px;
+        }
+        .modal-content h2 {
+            color: #92400E;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .sync-id-display {
+            background: #FEF3C7;
+            border: 2px solid #FCD34D;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #92400E;
+            letter-spacing: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn {
+            background: linear-gradient(to right, #FBBF24, #FB923C);
+            color: white;
+        }
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+        .close-btn {
+            background: #E5E7EB;
+            color: #92400E;
+        }
+        .close-btn:hover {
+            background: #D1D5DB;
+        }
+        .sync-id-badge {
+            position: fixed;
+            top: 20px;
+            right: 15px;
+            background: linear-gradient(to right, #3B82F6, #2563EB);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 998;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✨ 我的笔记本</h1>
+        <p>记录每天的想法和感受</p>
+    </div>
+
+    <div class="container">
+        <div class="date-section">
+            <div class="date-controls">
+                <button class="date-btn" onclick="goYesterday()">◀</button>
+                <input type="date" class="date-input" id="dateInput" onchange="changeDateByInput()">
+                <button class="date-btn" onclick="goTomorrow()">▶</button>
+            </div>
+            <div class="date-display" id="dateDisplay"></div>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-row">
+                <button class="toolbar-btn" onclick="applyFormat('bold')">B 加粗</button>
+                <button class="toolbar-btn" onclick="applyFormat('italic')">I 倾斜</button>
+            </div>
+            <div class="toolbar-row">
+                <button class="color-btn" style="background: #FCA5A5;" onclick="applyFormat('bg-red')" title="红色">红</button>
+                <button class="color-btn" style="background: #A7F3D0;" onclick="applyFormat('bg-green')" title="绿色">绿</button>
+                <button class="color-btn" style="background: #BFDBFE;" onclick="applyFormat('bg-blue')" title="蓝色">蓝</button>
+                <button class="color-btn" style="background: #E9D5FF;" onclick="applyFormat('bg-purple')" title="紫色">紫</button>
+            </div>
+        </div>
+
+        <div class="notebook-area">
+            <div id="noteText" contenteditable="true" placeholder="✍️ 写下你今天的想法..."></div>
+        </div>
+    </div>
+
+    <div class="menu-container">
+        <button class="menu-btn" onclick="toggleMenu()">⋯</button>
+        <div class="menu-dropdown" id="menuDropdown">
+            <div class="menu-item" onclick="saveNote(); closeMenu()">💾 保存</div>
+            <div class="menu-item" onclick="exportNotes(); closeMenu()">📥 导出</div>
+            <div class="menu-item" onclick="importNotes(); closeMenu()">📤 导入</div>
+            <div class="menu-item" onclick="toggleCloudSync(); closeMenu()">☁️ 生成同步ID</div>
+            <div class="menu-item" onclick="inputSyncId(); closeMenu()">🔗 输入同步ID</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>💫 坚持每日记录，让生活更有意义</p>
+    </div>
+
+    <input type="file" id="importFile" accept=".json" style="display: none;">
+    <div class="status" id="status" style="display: none;"></div>
+
+    <!-- 同步ID弹窗 -->
+    <div class="modal" id="syncModal">
+        <div class="modal-content">
+            <h2>✓ 同步已启用</h2>
+            <p style="color: #92400E; margin-bottom: 10px;">同步ID:</p>
+            <div class="sync-id-display" id="syncIdDisplay">A7K3</div>
+            <p style="color: #92400E; font-size: 12px; margin-bottom: 15px;">在其他设备输入此ID即可同步</p>
+            <div class="modal-buttons">
+                <button class="modal-btn copy-btn" onclick="copySyncId()">📋 复制ID</button>
+                <button class="modal-btn close-btn" onclick="closeSyncModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右上角显示当前同步ID -->
+    <div class="sync-id-badge" id="syncIdBadge" style="display: none;"></div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/notebook/sw.js', { scope: '/notebook/' }).catch(() => {});
+        }
+
+        let currentDate = new Date();
+        let notesData = JSON.parse(localStorage.getItem('notes') || '{}');
+        let syncEnabled = localStorage.getItem('syncEnabled') === 'true';
+        let syncId = localStorage.getItem('syncId') || null;
+
+        function updateSyncStatus() {
+            // 不需要更新任何元素，菜单里已经显示了
+        }
+
+        function updateDisplay() {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            document.getElementById('dateInput').value = dateStr;
+            const dayName = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][currentDate.getDay()];
+            document.getElementById('dateDisplay').textContent = currentDate.toLocaleDateString('zh-CN') + ' ' + dayName;
+            document.getElementById('noteText').innerHTML = notesData[dateStr] || '';
+        }
+
+        function goYesterday() {
+            currentDate.setDate(currentDate.getDate() - 1);
+            updateDisplay();
+        }
+
+        function goTomorrow() {
+            currentDate.setDate(currentDate.getDate() + 1);
+            updateDisplay();
+        }
+
+        function changeDateByInput() {
+            const input = document.getElementById('dateInput').value;
+            currentDate = new Date(input + 'T00:00:00');
+            updateDisplay();
+        }
+
+        function applyFormat(format) {
+            const selection = window.getSelection();
+            if (selection.toString().length === 0) {
+                showStatus('请先选择文字');
+                return;
+            }
+
+            const range = selection.getRangeAt(0);
+            const span = document.createElement('span');
+            span.dataset.formatted = 'true';
+
+            if (format === 'bold') {
+                span.style.fontWeight = 'bold';
+            } else if (format === 'italic') {
+                span.style.fontStyle = 'italic';
+            } else if (format === 'bg-red') {
+                span.style.backgroundColor = '#FCA5A5';
+                span.style.color = '#000';
+            } else if (format === 'bg-green') {
+                span.style.backgroundColor = '#A7F3D0';
+                span.style.color = '#000';
+            } else if (format === 'bg-blue') {
+                span.style.backgroundColor = '#BFDBFE';
+                span.style.color = '#000';
+            } else if (format === 'bg-purple') {
+                span.style.backgroundColor = '#E9D5FF';
+                span.style.color = '#000';
+            }
+
+            const fragment = range.extractContents();
+            span.appendChild(fragment);
+            range.insertNode(span);
+
+            const resetSpan = document.createElement('span');
+            resetSpan.dataset.reset = 'true';
+            resetSpan.style.backgroundColor = 'transparent';
+            resetSpan.style.color = '#92400E';
+            resetSpan.style.fontWeight = 'normal';
+            resetSpan.style.fontStyle = 'normal';
+
+            span.parentNode.insertBefore(resetSpan, span.nextSibling);
+
+            const newRange = document.createRange();
+            newRange.setStart(resetSpan, 0);
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+
+            showStatus('✓ 已应用');
+        }
+
+        function saveNote() {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            const html = document.getElementById('noteText').innerHTML;
+            notesData[dateStr] = html;
+            localStorage.setItem('notes', JSON.stringify(notesData));
+            showStatus('✓ 已保存');
+
+            // 如果启用了同步，自动同步
+            if (syncEnabled && syncId) {
+                syncToCloud();
+            }
+        }
+
+        function exportNotes() {
+            const dataStr = JSON.stringify(notesData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `笔记本备份_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showStatus('✓ 已导出');
+        }
+
+        function importNotes() {
+            const fileInput = document.getElementById('importFile');
+            fileInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        notesData = { ...notesData, ...importedData };
+                        localStorage.setItem('notes', JSON.stringify(notesData));
+                        updateDisplay();
+                        showStatus('✓ 已导入');
+                    } catch (err) {
+                        showStatus('✗ 导入失败');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            fileInput.click();
+        }
+
+        function toggleCloudSync() {
+            if (syncEnabled && syncId) {
+                disableSync();
+            } else {
+                enableSync();
+            }
+        }
+
+        function enableSync() {
+            // 生成4位短ID（数字和大写字母）
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            syncId = '';
+            for (let i = 0; i < 4; i++) {
+                syncId += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            syncEnabled = true;
+
+            localStorage.setItem('syncEnabled', 'true');
+            localStorage.setItem('syncId', syncId);
+
+            // 保存数据到本地存储中的云位置
+            const cloudKey = `cloud_${syncId}`;
+            localStorage.setItem(cloudKey, JSON.stringify(notesData));
+
+            // 显示弹窗
+            showSyncModal();
+
+            // 在右上角显示ID
+            updateSyncIdBadge();
+        }
+
+        function showSyncModal() {
+            const modal = document.getElementById('syncModal');
+            document.getElementById('syncIdDisplay').textContent = syncId;
+            modal.classList.add('active');
+        }
+
+        function closeSyncModal() {
+            const modal = document.getElementById('syncModal');
+            modal.classList.remove('active');
+        }
+
+        function copySyncId() {
+            // 复制到剪贴板
+            navigator.clipboard.writeText(syncId).then(() => {
+                showStatus('✓ ID已复制到剪贴板');
+                closeSyncModal();
+            }).catch(() => {
+                // 兼容老浏览器
+                const textArea = document.createElement('textarea');
+                textArea.value = syncId;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showStatus('✓ ID已复制到剪贴板');
+                closeSyncModal();
+            });
+        }
+
+        function updateSyncIdBadge() {
+            const badge = document.getElementById('syncIdBadge');
+            if (syncEnabled && syncId) {
+                badge.textContent = `☁️ ID: ${syncId}`;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function inputSyncId() {
+            // 直接显示输入框
+            showInputIdModal();
+        }
+
+        function showInputIdModal() {
+            const inputId = window.prompt('请输入同步ID（4位，如：A7K3）:');
+
+            if (!inputId) {
+                return; // 用户点击取消
+            }
+
+            const cleanId = inputId.toUpperCase().trim();
+
+            if (cleanId.length !== 4) {
+                alert('❌ ID必须是4位！\n\n请检查后重试。');
+                return;
+            }
+
+            // 检查云端是否有这个ID的数据
+            const cloudKey = `cloud_${cleanId}`;
+            const cloudData = localStorage.getItem(cloudKey);
+
+            if (!cloudData) {
+                alert('❌ 找不到此ID的数据！\n\n请确认ID是否正确。');
+                return;
+            }
+
+            // 设置同步ID
+            syncId = cleanId;
+            syncEnabled = true;
+
+            localStorage.setItem('syncEnabled', 'true');
+            localStorage.setItem('syncId', syncId);
+
+            // 导入数据
+            try {
+                const importedData = JSON.parse(cloudData);
+                notesData = importedData;
+                localStorage.setItem('notes', JSON.stringify(notesData));
+                updateDisplay();
+                updateSyncIdBadge();
+                alert('✅ 同步成功！\n\n已恢复所有笔记。');
+            } catch (err) {
+                alert('❌ 同步失败！');
+                console.error(err);
+            }
+        }
+
+        function disableSync() {
+            syncEnabled = false;
+            syncId = null;
+            localStorage.setItem('syncEnabled', 'false');
+            localStorage.setItem('syncId', '');
+            updateSyncStatus();
+            showStatus('✓ 已禁用同步');
+        }
+
+        function syncToCloud() {
+            if (!syncEnabled || !syncId) return;
+            const cloudKey = `cloud_${syncId}`;
+            localStorage.setItem(cloudKey, JSON.stringify(notesData));
+        }
+
+        function syncFromCloud() {
+            if (!syncEnabled || !syncId) return;
+            const cloudKey = `cloud_${syncId}`;
+            const cloudData = localStorage.getItem(cloudKey);
+            if (cloudData) {
+                try {
+                    const importedData = JSON.parse(cloudData);
+                    notesData = importedData;
+                    localStorage.setItem('notes', JSON.stringify(notesData));
+                    updateDisplay();
+                    showStatus('☁️ 已从云端同步');
+                } catch (err) {
+                    console.error('同步失败:', err);
+                }
+            }
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('menuDropdown');
+            menu.classList.toggle('active');
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('menuDropdown');
+            menu.classList.remove('active');
+        }
+
+        document.addEventListener('click', (e) => {
+            const menuContainer = document.querySelector('.menu-container');
+            if (!menuContainer.contains(e.target)) {
+                closeMenu();
+            }
+        });
+
+        function showStatus(msg) {
+            const status = document.getElementById('status');
+            status.textContent = msg;
+            status.style.display = 'block';
+            setTimeout(() => { status.style.display = 'none'; }, 1500);
+        }
+
+        updateDisplay();
+        updateSyncIdBadge();
+    </script>
+</body>
+</html>
