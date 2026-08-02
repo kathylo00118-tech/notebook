@@ -1,8 +1,8 @@
 const CACHE_NAME = 'notebook-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  '/notebook/',
+  '/notebook/index.html',
+  '/notebook/manifest.json'
 ];
 
 // 安装事件
@@ -52,7 +52,7 @@ self.addEventListener('fetch', event => {
       .catch(() => {
         return caches.match(event.request)
           .then(response => {
-            return response || new Response('离线 - 无可用缓存', {
+            return response || new Response('离线- 无可用缓存', {
               status: 503,
               statusText: '离线',
               headers: new Headers({
